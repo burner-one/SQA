@@ -1,51 +1,44 @@
-package prac5; 
-import jxl.Cell; 
-import jxl.Sheet; 
-import jxl.Workbook; 
-import jxl.read.biff.BiffException; 
-import jxl.*; 
-import jxl.read.*; 
-import jxl.write.*; 
-import java.io.*; 
-import org.testng.annotations.BeforeClass; 
-import org.testng.annotations.Test; 
-public class test { 
-@BeforeClass 
-public void fr() 
-{ 
-} 
-@Test 
-public void testImportExport() throws Exception 
-{ 
-FileInputStream fi= new FileInputStream("C:\\Selenium\\Book1.xls "); 
-Workbook w=Workbook.getWorkbook(fi); 
-Sheet s= w.getSheet(0); 
-String a[][]=new String[s.getRows()][s.getColumns()]; 
-FileOutputStream fo = new FileOutputStream ("C:\\Selenium\\Book2.xls"); 
-WritableWorkbook wwb = Workbook.createWorkbook(fo); 
-WritableSheet ws = wwb.createSheet("result",0); 
-int c=0; 
-for(int i=0;i<s.getRows();i++) 
-{ 
-for(int j=0;j<s.getColumns();j++) 
-{ 
-if(i>=1) 
-{ 
-} 
-String b=new String(); 
-b=s.getCell(5,i).getContents(); 
-int x=Integer.parseInt(b); 
-if(x<60) 
-{ 
-} 
-c++; 
-break; 
-a[i][j]=s.getCell(j,i).getContents(); 
-Label L2=new Label(j,i,a[i][j]); 
-ws.addCell(L2); 
-} 
-} 
-wwb.write(); 
-wwb.close(); 
-} 
+import jxl.*;
+import jxl.write.*;
+import java.io.*;
+
+public class P11 {
+    public void testImportExport() throws Exception {
+        // Input and output file streams
+        Workbook w = Workbook.getWorkbook(new FileInputStream("C:\\Selenium\\P11\\Book1.xls"));
+        WritableWorkbook wwb = Workbook.createWorkbook(new FileOutputStream("C:\\Selenium\\P11\\Book2.xls"));
+        WritableSheet ws = wwb.createSheet("result", 0);
+
+        // Copy headers and process rows
+        Sheet s = w.getSheet(0);
+        for (int j = 0; j < s.getColumns(); j++) ws.addCell(new Label(j, 0, s.getCell(j, 0).getContents()));
+        int outputRow = 1;
+
+        for (int i = 1; i < s.getRows(); i++) {
+            String scoreStr = s.getCell(5, i).getContents();
+            if (scoreStr.trim().isEmpty()) continue;
+
+            try {
+                if (Integer.parseInt(scoreStr) > 60) {
+                    for (int j = 0; j < s.getColumns(); j++)
+                        ws.addCell(new Label(j, outputRow, s.getCell(j, i).getContents()));
+                    outputRow++;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing score for row " + (i + 1) + ": " + scoreStr);
+            }
+        }
+
+        wwb.write();
+        wwb.close();
+        System.out.println("Process completed: Only students with scores > 60 have been written to Book2.xls.");
+    }
+
+    public static void main(String[] args) {
+        try {
+            new P11().testImportExport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
